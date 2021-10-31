@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<!-- Meta tags -->
+		<meta charset="utf-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+		<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport" />
+		<meta name="viewport" content="width=device-width" />
+
+		<!-- Favicon and title -->
+		<title>Python IDE</title>
+
+		<!-- Halfmoon CSS -->
+		<link href="https://cdn.jsdelivr.net/npm/halfmoon@1.1.1/css/halfmoon-variables.min.css" rel="stylesheet" />
+
+		<style type="text/css">
+			textarea {
+			    background: url(http://i.imgur.com/2cOaJ.png);
+				background-attachment: local;
+				background-repeat: no-repeat;
+				padding-left: 35px;
+				padding-top: 12px;
+			    resize: none;
+			}
+		</style>
+	</head>
+	<body class="with-custom-webkit-scrollbars with-custom-css-scrollbars" data-dm-shortcut-enabled="true" data-set-preferred-mode-onload="true">
+		<!-- Page wrapper start -->
+		<div class="page-wrapper with-navbar">
+
+			<!-- Navbar start -->
+			<nav class="navbar">
+				<!-- Navbar brand -->
+				<a href="#" class="navbar-brand">
+					Python IDE
+				</a>
+				<button class="btn ml-auto" type="button" onclick="halfmoon.toggleDarkMode()">🌗</button>
+			</nav>
+			<!-- Navbar end -->
+
+			<!-- Content wrapper start -->
+			<div class="content-wrapper">
+				<div class="editor h-half p-20">
+					<textarea spellcheck="false" class="h-full w-full text-monospace border rounded" placeholder="Please type your code here"></textarea>
+				</div>
+				<div class="h-half">
+					<div class="h-quarter text-center">
+						<button class="btn btn-lg btn-success" onclick="run()">Run</button>
+						<button class="btn btn-lg btn-secondary" onclick="reset()">Reset</button>
+					</div>
+					<div class="h-three-quarter p-20">
+						<div class="output p-10 h-full border rounded"><pre class="text-muted">Output will be displayed here</pre></div>
+					</div>
+				</div>
+			<!-- Content wrapper end -->
+
+		</div>
+		<!-- Page wrapper end -->
+
+		<!-- Halfmoon JS -->
+		<script src="https://cdn.jsdelivr.net/npm/halfmoon@1.1.1/js/halfmoon.min.js"></script>
+		<script type="text/javascript">
+			document.querySelector('textarea').addEventListener('keydown', function(e) {
+				if (e.key == 'Tab') {
+					e.preventDefault()
+					var start = this.selectionStart
+					var end = this.selectionEnd
+
+					// set textarea value to: text before caret + tab + text after caret
+					this.value = this.value.substring(0, start) + "\t" + this.value.substring(end)
+
+					// put caret at right position again
+					this.selectionStart = this.selectionEnd = start + 1
+				}
+			})
+			function run() {
+				const sourcecode = document.querySelector('textarea').value
+				fetch("/api", {
+					method: "POST",
+					body: sourcecode,
+				}).then(res => res.json())
+				.then(response => {
+					const output = document.querySelector("pre")
+					if(response.returncode === 0) {
+						output.className = "text-primary"
+						output.innerHTML = response.stdout
+					}
+					else {
+						output.className = "text-danger"
+						output.innerHTML = response.stderr
+					}
+				})
+			}
+			function reset() {
+				document.querySelector('textarea').value = ""
+			}
+		</script>
+	</body>
+</html>
